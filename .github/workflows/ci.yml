@@ -25,11 +25,11 @@ jobs:
         
     - name: Generate Mock Models for CI
       run: |
-        # Create a tiny script to generate dummy models so tests pass without local files
         python -c "
         import torch, joblib, os, numpy as np
         from sklearn.preprocessing import StandardScaler, LabelEncoder
         from sklearn.ensemble import RandomForestClassifier
+        import torch.nn as nn
         os.makedirs('models', exist_ok=True)
         with open('models/ae_threshold.txt', 'w') as f: f.write('0.1')
         dummy_data = np.random.rand(10, 42)
@@ -38,9 +38,15 @@ jobs:
         joblib.dump(scaler, 'models/scaler.pkl')
         les = {'proto': LabelEncoder().fit(['tcp', 'udp', 'icmp']), 'service': LabelEncoder().fit(['-', 'http', 'dns']), 'state': LabelEncoder().fit(['FIN', 'INT', 'CON'])}
         joblib.dump(les, 'models/label_encoders.pkl')
-        class Autoencoder(torch.nn.Module):
-            def __init__(self, d): super().__init__(); self.e = torch.nn.Linear(d, 10); self.d = torch.nn.Linear(10, d)
-            def forward(self, x): return self.d(self.e(x))
+        
+        # Match the REAL Autoencoder structure exactly
+        class Autoencoder(nn.Module):
+            def __init__(self, input_dim):
+                super().__init__()
+                self.encoder = nn.Sequential(nn.Linear(input_dim, 32), nn.ReLU(), nn.Linear(32, 16), nn.ReLU(), nn.Linear(16, 8))
+                self.decoder = nn.Sequential(nn.Linear(8, 16), nn.ReLU(), nn.Linear(16, 32), nn.ReLU(), nn.Linear(32, input_dim))
+            def forward(self, x): return self.decoder(self.encoder(x))
+        
         torch.save(Autoencoder(42).state_dict(), 'models/autoencoder.pth')
         rf = RandomForestClassifier(n_estimators=1); rf.fit(dummy_data, np.random.randint(0, 2, 10))
         joblib.dump(rf, 'models/rf_baseline.pkl')
