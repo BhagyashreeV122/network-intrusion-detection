@@ -25,32 +25,7 @@ jobs:
         
     - name: Generate Mock Models for CI
       run: |
-        python -c "
-        import torch, joblib, os, numpy as np
-        from sklearn.preprocessing import StandardScaler, LabelEncoder
-        from sklearn.ensemble import RandomForestClassifier
-        import torch.nn as nn
-        os.makedirs('models', exist_ok=True)
-        with open('models/ae_threshold.txt', 'w') as f: f.write('0.1')
-        dummy_data = np.random.rand(10, 42)
-        scaler = StandardScaler(); scaler.fit(dummy_data)
-        scaler.feature_names_in_ = np.array(['dur', 'spkts', 'dpkts', 'sbytes', 'dbytes', 'rate', 'sttl', 'dttl', 'sload', 'dload', 'sloss', 'dloss', 'sinpkt', 'dinpkt', 'sjit', 'djit', 'swin', 'stcpb', 'dtcpb', 'dwin', 'tcprtt', 'synack', 'ackdat', 'smean', 'dmean', 'trans_depth', 'response_body_len', 'ct_srv_src', 'ct_state_ttl', 'ct_dst_ltm', 'ct_src_dport_ltm', 'ct_dst_sport_ltm', 'ct_dst_src_ltm', 'is_ftp_login', 'ct_ftp_cmd', 'ct_flw_http_mthd', 'ct_src_ltm', 'ct_srv_dst', 'is_sm_ips_ports'])
-        joblib.dump(scaler, 'models/scaler.pkl')
-        les = {'proto': LabelEncoder().fit(['tcp', 'udp', 'icmp']), 'service': LabelEncoder().fit(['-', 'http', 'dns']), 'state': LabelEncoder().fit(['FIN', 'INT', 'CON'])}
-        joblib.dump(les, 'models/label_encoders.pkl')
-        
-        # Match the REAL Autoencoder structure exactly
-        class Autoencoder(nn.Module):
-            def __init__(self, input_dim):
-                super().__init__()
-                self.encoder = nn.Sequential(nn.Linear(input_dim, 32), nn.ReLU(), nn.Linear(32, 16), nn.ReLU(), nn.Linear(16, 8))
-                self.decoder = nn.Sequential(nn.Linear(8, 16), nn.ReLU(), nn.Linear(16, 32), nn.ReLU(), nn.Linear(32, input_dim))
-            def forward(self, x): return self.decoder(self.encoder(x))
-        
-        torch.save(Autoencoder(42).state_dict(), 'models/autoencoder.pth')
-        rf = RandomForestClassifier(n_estimators=1); rf.fit(dummy_data, np.random.randint(0, 2, 10))
-        joblib.dump(rf, 'models/rf_baseline.pkl')
-        "
+        python generate_mocks.py
         
     - name: Run Pytest
       run: |
