@@ -17,11 +17,16 @@ es_url = os.getenv("ELASTICSEARCH_URL", "http://localhost:9200")
 # Using basic auth if needed, but here it's disabled in docker-compose
 es = Elasticsearch(es_url)
 
-# Load models and preprocessing objects at startup
+# Initialize global variables with defaults
 models_dir = "models"
 MODELS_LOADED = False
-threshold = 0.1 # Default value
+threshold = 0.1
+autoencoder = None
+rf_baseline = None
+scaler = None
+label_encoders = None
 
+# Load models and preprocessing objects at startup
 try:
     if os.path.exists(os.path.join(models_dir, "ae_threshold.txt")):
         scaler = joblib.load(os.path.join(models_dir, "scaler.pkl"))
