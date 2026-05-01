@@ -1,3 +1,6 @@
+[kibana_dashboard.png.doc](https://github.com/user-attachments/files/27272940/kibana_dashboard.png.doc)
+<img width="1000" height="800" alt="roc_curve_comparison" src="https://github.com/user-attachments/assets/65c87b3f-8ddf-47cf-9f3e-d28f6988271c" />
+<img width="1000" height="600" alt="attack_cat_distribution" src="https://github.com/user-attachments/assets/b74821c9-8ea8-4861-94d0-ba04ed2364e1" />
 # Cloud VM Network Intrusion Detection System (IDS)
 
 This project implements a Network Anomaly Detection System using the UNSW-NB15 dataset. It features both a Random Forest classifier and a PyTorch-based Autoencoder for detecting malicious traffic.
