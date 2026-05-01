@@ -10,3 +10,4 @@ uvicorn
 pytest
 joblib
 elasticsearch==8.10.1
+httpx
