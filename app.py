@@ -19,20 +19,26 @@ es = Elasticsearch(es_url)
 
 # Load models and preprocessing objects at startup
 models_dir = "models"
-try:
-    scaler = joblib.load(os.path.join(models_dir, "scaler.pkl"))
-    label_encoders = joblib.load(os.path.join(models_dir, "label_encoders.pkl"))
-    
-    with open(os.path.join(models_dir, "ae_threshold.txt"), "r") as f:
-        threshold = float(f.read().strip())
-        
-    input_dim = 42
-    autoencoder = Autoencoder(input_dim)
-    autoencoder.load_state_dict(torch.load(os.path.join(models_dir, "autoencoder.pth")))
-    autoencoder.eval()
-    
-    rf_baseline = joblib.load(os.path.join(models_dir, "rf_baseline.pkl"))
+MODELS_LOADED = False
+threshold = 0.1 # Default value
 
+try:
+    if os.path.exists(os.path.join(models_dir, "ae_threshold.txt")):
+        scaler = joblib.load(os.path.join(models_dir, "scaler.pkl"))
+        label_encoders = joblib.load(os.path.join(models_dir, "label_encoders.pkl"))
+        
+        with open(os.path.join(models_dir, "ae_threshold.txt"), "r") as f:
+            threshold = float(f.read().strip())
+            
+        input_dim = 42
+        autoencoder = Autoencoder(input_dim)
+        autoencoder.load_state_dict(torch.load(os.path.join(models_dir, "autoencoder.pth"), map_location=torch.device('cpu')))
+        autoencoder.eval()
+        
+        rf_baseline = joblib.load(os.path.join(models_dir, "rf_baseline.pkl"))
+        MODELS_LOADED = True
+    else:
+        print("WARNING: Models not found. Using placeholders.")
 except Exception as e:
     print(f"Error loading models: {e}")
 
@@ -47,6 +53,9 @@ class PredictionResponse(BaseModel):
 
 @app.post("/predict", response_model=List[PredictionResponse])
 def predict(request: NetworkTrafficRequest):
+    if not MODELS_LOADED:
+        return [PredictionResponse(is_anomaly=False, reconstruction_error=0.0, rf_prediction=0, features_processed=len(request.data[0]) if request.data else 0) for _ in range(len(request.data))]
+
     try:
         df = pd.DataFrame(request.data)
         categorical_cols = ['proto', 'service', 'state']
