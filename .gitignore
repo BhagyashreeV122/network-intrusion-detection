@@ -1,0 +1,25 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.venv/
+env/
+venv/
+ENV/
+
+# Data and Models (Too large for GitHub)
+data/
+models/*.pth
+models/*.pkl
+models/*.joblib
+*.png
+
+# Docker
+.dockerignore
+
+# OS files
+.DS_Store
+Thumbs.db
+.wslconfig.txt

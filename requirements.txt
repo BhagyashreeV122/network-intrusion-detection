@@ -1,0 +1,12 @@
+pandas
+numpy
+scikit-learn
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+matplotlib
+seaborn
+fastapi
+uvicorn
+pytest
+joblib
+elasticsearch==8.10.1
